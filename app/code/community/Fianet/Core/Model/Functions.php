@@ -41,7 +41,7 @@ class Fianet_Core_Model_Functions
 	}
 	
 	//Calcule la date de livraison en jour ouvré à partir de la date courante
-	public function get_delivery_date($delivery_times)
+	public function get_delivery_date($delivery_times, Fianet_Core_Model_Configuration_Value $configurationData, $orderIncrementId)
 	{
 		define('H', date("H"));
 		define('i', date("i"));
@@ -49,26 +49,41 @@ class Fianet_Core_Model_Functions
 		define('m', date("m"));
 		define('d', date("d"));
 		define('Y', date("Y"));
-		define('SUNDAY', 0);
 		define('SATURDAY', 6);
+		define('SUNDAY', 7);
 		
 		$nb_days = 0;
 		$j = 0;
+		$log = 'Délais de livraison le plus long : ' . $delivery_times . " commande #".$orderIncrementId." \r\n";
 		while ($nb_days < $delivery_times)
 		{
 			$j++;
 			$date = mktime(H, i, s, m, d + $j, Y);
-			$day = date("w", $date);
+			$day = date("N", $date);
 			if ($day != SUNDAY && $day != SATURDAY)
 			{
 				$nb_days++;
+				$log .= 'J'.$j . '('.date('Y-m-d', $date).') est un jour de semaine('.date('l', $date).').' . "\r\n";
+			}
+			else
+			{
+				$log .= 'J'.$j . '('.date('Y-m-d', $date).') est un week-end('.date('l', $date).').' . "\r\n";
 			}
 		}
-		if ($j > 23)
+		$max = $configurationData->load('RNP_MERCHANT_MAX_DELIVERY_TIMES')->Value;
+		if ($max == null)
+		{
+			$configurationData->setScope(0);
+			$max = $configurationData->load('RNP_MERCHANT_MAX_DELIVERY_TIMES')->Value;
+		}
+		$max = (int)$max;
+		if ($j > $max)
 		{//si on dépasse le délais de livraison max à causes des samedi et dimanche on remet le délais de livraison à son maximum
-			$j = 23;
+			$j = $max;
+			$log .= $max .' jours dépassés. Date de livraison ramenée à '.$max.' jours';
 		}
 		//$j = 200;
+		Mage::getModel('fianet/log')->Log($log);
 		$date = mktime(H, i, s, m, d + $j, Y);
 		return (date("Y-m-d", $date));
 	}

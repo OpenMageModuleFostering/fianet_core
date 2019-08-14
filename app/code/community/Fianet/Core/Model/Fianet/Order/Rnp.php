@@ -252,7 +252,7 @@ class Fianet_Core_Model_Fianet_Order_Rnp
 			$RnPOrder->info_commande->list->add_product($product);
 		}
 		
-		$RnPOrder->wallet->datelivr = Mage::getModel('fianet/functions')->get_delivery_date(self::getMaxShippingTimes($order));
+		$RnPOrder->wallet->datelivr = Mage::getModel('fianet/functions')->get_delivery_date(self::getMaxShippingTimes($order), $configurationData, $order->getRealOrderId());
 		return ($RnPOrder);
 	}
 	
