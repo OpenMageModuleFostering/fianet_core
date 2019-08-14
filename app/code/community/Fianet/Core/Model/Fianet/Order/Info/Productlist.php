@@ -10,43 +10,40 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 class Fianet_Core_Model_Fianet_Order_Info_Productlist {
 
-    protected $products_list = array();
+    protected $productsList = array();
 
-    public function __construct() {
 
-    }
-
-    public function add_product($product) {
-        if (Mage::getModel('fianet/functions')->var_is_object_of_class($product, 'Fianet_Core_Model_Fianet_Order_Info_ProductList_Product')) {
-            $this->products_list[] = $product;
+    public function addProduct($product) {
+        if ($product instanceof Fianet_Core_Model_Fianet_Order_Info_Productlist_Product) {
+            $this->productsList[] = $product;
         } else {
-            Mage::throwException("Mage_Fianet_Model_Fianet_Order_Info_Productlist::add_product() - Data are not a valid Mage_Fianet_Model_Fianet_Order_Info_Productlist_Product type");
+            Mage::throwException("Fianet_Core_Model_Fianet_Order_Info_Productlist::addProduct() - Data are not a valid Fianet_Core_Model_Fianet_Order_Info_Productlist_Product type");
         }
     }
 
-    public function get_xml() {
+    public function getXml() {
         $xml = '';
-        if (count($this->products_list) > 0) {
+        if (count($this->productsList) > 0) {
 
-            $xml .= "\t\t" . '<list nbproduit="' . $this->count_nbproduct() . '">' . "\n";
-            foreach ($this->products_list as $product) {
-                $xml .= $product->get_xml();
+            $xml .= "\t\t" . '<list nbproduit="' . $this->_countNbProducts() . '">' . "\n";
+            foreach ($this->productsList as $product) {
+                $xml .= $product->getXml();
             }
             $xml .= "\t\t" . '</list>' . "\n";
         }
         return ($xml);
     }
 
-    protected function count_nbproduct() {
+    protected function _countNbProducts() {
         $n = 0;
-        foreach ($this->products_list as $product) {
+        foreach ($this->productsList as $product) {
             $n += $product->nb;
         }
         return ($n);

@@ -10,9 +10,9 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 class Fianet_Core_Model_Fianet_Sender {
@@ -22,10 +22,10 @@ class Fianet_Core_Model_Fianet_Sender {
     protected $sites_conf = array();
 
     public function __construct() {
-        $this->encoding = (string) Mage::getModel('fianet/configuration')->getGlobalValue('XML_ENCODING');
+        $this->encoding = Mage::getStoreConfig('sac/sacconfg/charset', '0');
     }
 
-    public function add_order(Fianet_Core_Model_Fianet_Order_Sac $order) {
+    public function addOrder(Fianet_Sac_Model_Fianet_Order_Sac $order) {
         $this->orders[$order->info_commande->siteid][] = $order;
         if (!isset($this->sites_configuration[$order->info_commande->siteid])) {
             $this->sites_conf[$order->info_commande->siteid]['scope_field'] = $order->scope_field;
@@ -34,15 +34,14 @@ class Fianet_Core_Model_Fianet_Sender {
     }
 
     public function send() {
-        $stacks = $this->get_stacks();
+        $stacks = $this->getStacks();
         $responses = array();
         foreach ($stacks as $siteid => $stacksof25) {
-            $url = $this->build_url('SAC_URL_STACKING', $siteid);
+            $url = $this->buildUrl('stacking', $siteid);
             foreach ($stacksof25 as $stack) {
                 $params = array('siteid' => $siteid, 'controlcallback' => $stack);
-                $response = $this->get_zend_http_response($url, $params);
-                //Mage::getModel('fianet/log')->log($response->getBody());
-                $response = Mage::getModel('fianet/fianet_parser')->process_result_stacking($response->getBody());
+                $response = $this->getResponse($url, $params);
+                $response = Mage::getModel('fianet/fianet_parser')->processResultStacking($response->getBody());
                 if (is_array($response)) {
                     $responses = array_merge($responses, $response);
                 }
@@ -51,72 +50,56 @@ class Fianet_Core_Model_Fianet_Sender {
         return ($responses);
     }
 
-    public function get_reevaluation() {
-        $ConfigurationScope = Mage::getModel('fianet/configuration')->getGlobalValue('CONFIGURATION_SCOPE');
-        //Zend_Debug::dump($ConfigurationScope, 'ConfigurationScope');
+    public function getReevaluation() {
         $sites = array();
         $websiteCollection = Mage::getModel('core/website')->getResourceCollection();
         foreach ($websiteCollection as $website) {
             $groupCollection = $website->getGroupCollection();
             foreach ($groupCollection as $group) {
-                $viewCollection = $group->getStoreCollection();
-                foreach ($viewCollection as $storeView) {
-                    $storeView->getId();
-                    $configurationData = Mage::getModel('fianet/configuration_value');
-                    $configurationData->_scope_field = $ConfigurationScope;
-                    switch ($ConfigurationScope) {
-                        case 'website_id':
-                            $id = $website->getId();
-                            break;
-                        case 'group_id':
-                            $id = $group->getId();
-                            break;
-                        case 'store_id':
-                            $id = $storeView->getId();
-                            break;
-                    }
-                    $configurationData->setScope($id);
+                $id = $group->getId();
+                $index = count($sites);
+                $sites[$index]['siteid'] = Mage::getStoreConfig('sac/sacconfg/siteid', $id);
 
-                    $index = count($sites);
-                    $sites[$index]['siteid'] = $configurationData->load('SAC_SITEID')->getValue();
-                    $sites[$index]['password'] = $configurationData->load('SAC_PASSWORD')->getValue();
-                    $sites[$index]['mode'] = $configurationData->load('SAC_STATUS')->getValue();
-                    if ($sites[$index]['siteid'] === NULL) {
-                        $configurationData->setScope(0);
-                        $sites[$index]['siteid'] = $configurationData->load('SAC_SITEID')->getValue();
-                        $sites[$index]['password'] = $configurationData->load('SAC_PASSWORD')->getValue();
-                        $sites[$index]['mode'] = $configurationData->load('SAC_STATUS')->getValue();
-                        if ($sites[$index]['siteid'] === NULL || $sites[$index]['password'] === NULL) {
-                            unset($sites[$index]);
-                        }
-                    }
+                if ($sites[$index]['siteid'] == null && $id > 0)
+                    $sites[$index]['siteid'] = Mage::getStoreConfig('sac/sacconfg/siteid', '0');
+
+                $sites[$index]['password'] = Mage::getStoreConfig('sac/sacconfg/password', $id);
+
+                if ($sites[$index]['password'] == null && $id > 0)
+                    $sites[$index]['password'] = Mage::getStoreConfig('sac/sacconfg/password', '0');
+
+                $sites[$index]['mode'] = Mage::getStoreConfig('sac/sacconfg/mode', $id);
+
+                if ($sites[$index]['mode'] == null && $id > 0)
+                    $sites[$index]['mode'] = Mage::getStoreConfig('sac/sacconfg/mode', '0');
+
+                if ($sites[$index]['siteid'] === NULL || $sites[$index]['password'] === NULL) {
+                    unset($sites[$index]);
                 }
             }
         }
         $reevaluations = array();
+
         foreach ($sites as $infos) {
-            $url = $this->build_url('SAC_URL_GETALERT', $infos['siteid'], $infos['mode']);
-            //$infos['siteid'] = 0;
+            $url = $this->buildUrl('alert', $infos['siteid'], $infos['mode']);
             $params = array(
                 'SiteID' => $infos['siteid'],
                 'Pwd' => $infos['password'],
                 'Mode' => 'new',
                 'Output' => 'new',
-                //'Mode'		=>	'old',
-                //'Output'	=>	'old',
                 'RepFT' => '0'
             );
-            //Zend_Debug::dump($params);
-            $response = $this->get_zend_http_response($url, $params);
+
+            $response = $this->getResponse($url, $params);
             $xml_array = Fianet_Core_Model_Functions::xml2array($response->getBody());
-            $reevals = Mage::getModel('fianet/fianet_parser')->process_result_nostack($xml_array);
+            $reevals = Mage::getModel('fianet/fianet_parser')->processResultNostack($xml_array);
             $reevaluations = array_merge($reevaluations, $reevals);
         }
-        //Zend_Debug::dump($reevaluations);
+
         return ($reevaluations);
     }
 
-    protected function get_siteid_infos($data) {
+    protected function getSiteIdInfos($data) {
         $infos = array();
         $scope = '';
         $id = 0;
@@ -131,98 +114,50 @@ class Fianet_Core_Model_Fianet_Sender {
             $id = $data['store_id'];
         }
 
-        $configurationData = Mage::getModel('fianet/configuration_value');
-        $configurationData->_scope_field = $scope;
-        $configurationData->setScope($id);
+        $mode = Mage::getStoreConfig('sac/sacconfg/mode', $id);
+        if ($mode == null && $id > 0)
+            $mode = Mage::getStoreConfig('sac/sacconfg/mode', '0');
 
-        $statut = $configurationData->load('SAC_STATUS')->Value;
-        if ($statut == '1' || $statut == '2') {
+        if ($mode == Fianet_Core_Model_Source_Mode::MODE_TEST || $mode == Fianet_Core_Model_Source_Mode::MODE_PRODUCTION) {
             $infos[$data['siteid']]['siteid'] = $data['siteid'];
-            $infos[$data['siteid']]['login'] = $configurationData->load('SAC_LOGIN')->Value;
-            $infos[$data['siteid']]['password'] = $configurationData->load('SAC_PASSWORD')->Value;
-            $infos[$data['siteid']]['mode'] = $statut;
+
+            $infos[$data['siteid']]['login'] = Mage::getStoreConfig('sac/sacconfg/compte', $id);
+            if ($infos[$data['siteid']]['login'] == null && $id > 0)
+                $infos[$data['siteid']]['login'] = Mage::getStoreConfig('sac/sacconfg/compte', '0');
+
+            $infos[$data['siteid']]['password'] = Mage::getStoreConfig('sac/sacconfg/password', $id);
+            if ($infos[$data['siteid']]['password'] == null && $id > 0)
+                $infos[$data['siteid']]['password'] = Mage::getStoreConfig('sac/sacconfg/password', '0');
+
+            $infos[$data['siteid']]['mode'] = $mode;
         }
         return ($infos);
     }
 
-    public function get_evaluations(array $order_list) {
+    public function getEvaluations(array $order_list) {
+		
         $evaluations = array();
         foreach ($order_list as $site_id => $infos) {
             $order_list_by_stack = array_chunk($infos['orders'], 50, true);
             $info['siteid'] = $site_id;
-            $info['mode'] = $infos['mode'];
+            $info['mode'] = $infos['mode']; //TEST or PRODUCTION, voir BD
             $info['login'] = $infos['login'];
             $info['pwd'] = $infos['pwd'];
             foreach ($order_list_by_stack as $stack) {
-                $evaluations = array_merge($this->get_evaluation_by_stack($stack, $info), $evaluations);
+                $evaluations = array_merge($this->getEvaluationByStack($stack, $info), $evaluations);
             }
         }
+		
         return ($evaluations);
     }
 
-    /*
-      protected function sort_order_by_site($refid_list)
-      {
-      $order_list = array();
-
-      foreach ($refid_list as $refid)
-      {
-      $infos = $this->get_sac_info($refid);
-      $order_list[$infos['siteid']]['mode'] = $infos['mode'];
-      $order_list[$infos['siteid']]['login'] = $infos['login'];
-      $order_list[$infos['siteid']]['pwd'] = $infos['pwd'];
-      $order_list[$infos['siteid']]['refid'][] = $refid;
-      }
-
-      return ($order_list);
-      } */
-    /*
-      protected function get_sac_info($refid)
-      {
-      $infos = array();
-      $order = Mage::getModel('sales/order')->loadByIncrementId($refid);
-      $scope_field = Mage::getModel('fianet/configuration')->getGlobalValue('CONFIGURATION_SCOPE');
-      switch ($scope_field)
-      {
-      case ('store_id'):
-      $id = $order->getStore()->getId();
-      break;
-      case ('group_id'):
-      $id = $order->getStore()->getGroup()->getId();
-      break;
-      case ('website_id'):
-      $id = $order->getStore()->getWebsite()->getId();
-      break;
-      default:
-      $id = $order->getStore()->getGroup()->getId();
-      break;
-      }
-      $configurationData = Mage::getModel('fianet/configuration_value');
-      $configurationData->_scope_field = $scope_field;
-      $configurationData->setScope($id);
-
-      $infos['mode']		= $order->getData('fianet_sac_mode');
-      $infos['siteid']	= $configurationData->load('SAC_SITEID')->Value;
-      $infos['login']		= $configurationData->load('SAC_LOGIN')->Value;
-      $infos['pwd']		= $configurationData->load('SAC_PASSWORD')->Value;
-      if ($infos['siteid'] == null)
-      {
-      $configurationData->setScope(0);
-      $infos['siteid']= $configurationData->load('SAC_SITEID')->Value;
-      $infos['login'] = $configurationData->load('SAC_LOGIN')->Value;
-      $infos['pwd']	= $configurationData->load('SAC_PASSWORD')->Value;
-      }
-      return ($infos);
-      } */
-
-    protected function get_evaluation_by_stack($stack, $info) {
-
+    protected function getEvaluationByStack($stack, $info) {
         $evaluations = array();
         if (count($stack) <= 0) {
             return ($evaluations);
         }
         $siteid = $info['siteid'];
-        $mode = $info['mode'] == 'TEST' ? 1 : 2;
+        $mode = $info['mode'] == 'TEST' ? 'test' : 'production'; //TEST or PRODUCTION, voir BD
         $login = $info['login'];
         $pwd = $info['pwd'];
 
@@ -235,7 +170,7 @@ class Fianet_Core_Model_Fianet_Sender {
             }
         }
 
-        $url = $this->build_url('SAC_URL_VALIDSTACK', $siteid, $mode);
+        $url = $this->buildUrl('validstack', $siteid, $mode);
         $params['SiteID'] = $siteid;
         $params['Pwd'] = $pwd;
         $params['Mode'] = 'mini';
@@ -243,57 +178,57 @@ class Fianet_Core_Model_Fianet_Sender {
         $params['ListID'] = $listId;
         $params['Separ'] = ',';
 
-        $response = $this->get_zend_http_response($url, $params);
+        $response = $this->getResponse($url, $params);
         $response = Fianet_Core_Model_Functions::xml2array($response->getBody());
-        //Zend_Debug::dump($response);
-        $evaluations = Mage::getModel('fianet/fianet_parser')->process_result($response);
-
+        $evaluations = Mage::getModel('fianet/fianet_parser')->processResult($response);
 
         return ($evaluations);
     }
 
-    protected function get_stacks() {
+    protected function getStacks() {
         $stacks = array();
         foreach ($this->orders as $siteid => $listorders) {
             $listorders = array_chunk($listorders, 25);
             foreach ($listorders as $orders25) {
-                $stacks[$siteid][] = $this->build_stack_of_25($orders25);
+                $stacks[$siteid][] = $this->buildStackOf25($orders25);
             }
         }
         return ($stacks);
     }
 
-    protected function build_stack_of_25($orders) {
+    protected function buildStackOf25($orders) {
         $xml = '';
         $xml .= '<?xml version="1.0" encoding="' . $this->encoding . '" ?>' . "\n";
         $xml .= '<stack>' . "\n";
 
         foreach ($orders as $o) {
-            $xml .= $o->get_xml();
+            $xml .= $o->getXml();
         }
 
         $xml .= '</stack>' . "\n";
         return ($xml);
     }
 
-    protected function build_url($name, $siteid, $statut = null) {
-        if ($statut == null) {
-            $statut = $this->get_site_statut($siteid);
+    protected function buildUrl($name, $siteid, $mode = null) {
+        if ($mode == null) {
+            $mode = $this->getSiteMode($siteid);
         }
+
         $url = null;
-        if ($statut == '1') {//mode TEST
-            $url = Mage::getModel('fianet/configuration')->getGlobalValue('SAC_BASEURL_TEST');
+        if ($mode == Fianet_Core_Model_Source_Mode::MODE_TEST) {
+            $url = Mage::getStoreConfig('sac/saclink/testurl', '0');
         }
-        if ($statut == '2') {//mode PRODUCTION
-            $url = Mage::getModel('fianet/configuration')->getGlobalValue('SAC_BASEURL_PRODUCTION');
+        if ($mode == Fianet_Core_Model_Source_Mode::MODE_PRODUCTION) {
+            $url = Mage::getStoreConfig('sac/saclink/produrl', '0');
         }
         if ($url != null) {
-            $url .= Mage::getModel('fianet/configuration')->getGlobalValue($name);
+            $url .= Mage::getStoreConfig('sac/saclink/' . $name, '0');
         }
+
         return ($url);
     }
 
-    protected function get_zend_http_response($url, $params = null) {
+    protected function getResponse($url, $params = null) {
         $response = false;
         try {
             $config = array('maxredirects' => 0, 'timeout' => 30);
@@ -312,20 +247,14 @@ class Fianet_Core_Model_Fianet_Sender {
         return ($response);
     }
 
-    protected function get_site_statut($siteid) {
-        $statut = '0';
+    protected function getSiteMode($siteid) {
+        $groupid = $this->sites_conf[$siteid]['scope_id'];
 
-        $configurationData = Mage::getModel('fianet/configuration_value');
-        $configurationData->_scope_field = $this->sites_conf[$siteid]['scope_field'];
-        $configurationData->setScope($this->sites_conf[$siteid]['scope_id']);
+        $mode = Mage::getStoreConfig('sac/sacconfg/mode', $groupid);
+        if ($mode == null && $groupid > 0)
+            $mode = Mage::getStoreConfig('sac/sacconfg/mode', '0');
 
-        $statut = $configurationData->load('SAC_STATUS')->Value;
-        if ($statut == "" && $this->sites_conf[$siteid]['scope_id'] > 0) {
-            $configurationData->setScope(0);
-            $statut = $configurationData->load('SAC_STATUS')->Value;
-        }
-
-        return ($statut);
+        return ($mode);
     }
 
 }

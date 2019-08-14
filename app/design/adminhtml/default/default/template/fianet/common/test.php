@@ -9,9 +9,9 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 ?>
@@ -48,9 +48,9 @@ $storeid = $this->getRequest()->getParam('store', 0);
             <input type="hidden" name="store" value="<?php echo $storeid; ?>">
             <input type="hidden" name="id" value="<?php echo $this->selectedcategorieid; ?>">
             <input type="hidden" name="name" value="<?php echo $this->selectedcategoriename; ?>">
-            <select name="typeProduct">
+            <select name="productType">
                 <?php
-                $types = Mage::getModel('fianet/source_TypeProduct')->toOptionArray();
+                $types = Mage::getModel('fianet/source_productType')->toOptionArray();
                 if ($this->producttype->getId() <= 0) {
                     echo '<optgroup label="' . $this->__('Choose a value') . '">';
                     echo '<option value="" selected>' . $this->__('Nothing configured') . '</option>';

@@ -10,17 +10,17 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 class Fianet_Core_Model_Source_DeliveryTimes {
 
     public function toOptionArray() {
         return array(
-            array('value' => 1, 'label' => Mage::helper('fianet')->__('Express (moins de 24h)')),
-            array('value' => 2, 'label' => Mage::helper('fianet')->__('Standard'))
+            array('value' => "1", 'label' => Mage::helper('fianet')->__('Express (moins de 24h)')),
+            array('value' => "2", 'label' => Mage::helper('fianet')->__('Standard'))
         );
     }
 

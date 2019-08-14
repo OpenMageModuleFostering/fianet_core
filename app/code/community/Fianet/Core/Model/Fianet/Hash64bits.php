@@ -10,11 +10,29 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
+/*
+ * * PHP implementation of the RSA Data Security, Inc. MD5 Message
+ * * Digest Algorithm, as defined in RFC 1321.
+ *
+ * * Version 1.1
+ * * Copyright 2004 Marcus Campbell
+ * * http://www.tecknik.net/md5/
+ *
+ * * This code is available under the GNU Lesser General Public License:
+ * * http://www.gnu.org/licenses/lgpl.txt
+ *
+ * * Based on the JavaScript implementation by Paul Johnston
+ * * http://pajhome.org.uk/
+ *
+ * * Modified by PJ ALBERT
+ * * for 64bit system
+ */
+
 Class Fianet_Core_Model_Fianet_Hash64bits {
 
     var $a;
@@ -67,6 +85,7 @@ Class Fianet_Core_Model_Fianet_Hash64bits {
 
     function str2blks_MD5($str) {
         $nblk = ((strlen($str) + 8) >> 6) + 1;
+        $blks = array();
         for ($i = 0; $i < $nblk * 16; $i++)
             $blks[$i] = 0;
         for ($i = 0; $i < strlen($str); $i++)

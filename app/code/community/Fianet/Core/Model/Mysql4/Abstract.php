@@ -10,19 +10,14 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
-class Fianet_Core_Model_Mysql4_Abstract extends Mage_Core_Model_Mysql4_Abstract {
-
-    protected function _construct() {
-        parent::_construct();
-    }
+abstract class Fianet_Core_Model_Mysql4_Abstract extends Mage_Core_Model_Mysql4_Abstract {
 
     public function save(Mage_Core_Model_Abstract $object) {
-        //Zend_Debug::dump('Save');
         if ($object->isDeleted()) {
             return $this->delete($object);
         }

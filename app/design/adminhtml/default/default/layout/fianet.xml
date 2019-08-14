@@ -10,36 +10,35 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 -->
 <layout>
-    <fianet_category_typeproduct_index>
+    <fianet_adminhtml_category_producttype_index>
         <reference name="left">
-            <!--block type="fianet/store_switcher" name="storeswitcher" /-->
-            <block type="fianet/tree_typeProduct" name="tree"></block>
+            <block type="fianet/adminhtml_tree_productType" name="tree" />
         </reference>
         <reference name="content">
-            <block type="fianet/category_typeproduct_edit" name="catproduct" template="fianet/common/categorytreeformcontenair.phtml"/>
+            <block type="fianet/adminhtml_category_productType_edit" name="catproduct" template="fianet/common/categorytreeformcontenair.phtml"/>
         </reference>
-    </fianet_category_typeproduct_index>
-    <fianet_shipping_index>
+    </fianet_adminhtml_category_producttype_index>
+    <fianet_adminhtml_shipping_index>
         <reference name="content">
-            <block type="fianet/fianetadmin" name="shipping" template="fianet/common/shipping.phtml"/>
+            <block type="fianet/adminhtml_fianetadmin" name="shipping" template="fianet/common/shipping.phtml"/>
         </reference>
-    </fianet_shipping_index>
-    <fianet_log_index>
+    </fianet_adminhtml_shipping_index>
+    <fianet_adminhtml_log_index>
         <reference name="content">
-            <block type="fianet/fianetadmingrid" name="log" />
+            <block type="fianet/adminhtml_fianetadmingrid" name="log" />
         </reference>
-    </fianet_log_index>
-    <fianet_configuration_index>
+    </fianet_adminhtml_log_index>
+    <fianet_adminhtml_configuration_index>
         <reference name="left">
-            <block type="fianet/store_switcher" name="storeswitcher" />
-            <block type="fianet/configuration_tab" name="fianet_configuration_tabs">
+            <block type="fianet/adminhtml_store_switcher" name="storeswitcher" />
+            <block type="fianet/adminhtml_configuration_tab" name="fianet_configuration_tabs">
                 <action method="addConfigurationTab">
                     <name>CommonTab</name>
                     <label>Common</label>
@@ -49,7 +48,7 @@
             </block>
         </reference>
         <reference name="content">
-            <block type="fianet/configuration" name="configuration_content" />
+            <block type="fianet/adminhtml_configuration" name="configuration_content" />
         </reference>
-    </fianet_configuration_index>
+    </fianet_adminhtml_configuration_index>
 </layout>

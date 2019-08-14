@@ -10,9 +10,9 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 interface IFianetTree {
@@ -24,14 +24,9 @@ interface IFianetTree {
 
 abstract class Fianet_Core_Controller_Tree_Abstract extends Mage_Adminhtml_Controller_Action implements IFianetTree {
 
-    private $_block = 'fianet/tree_abstract';
-
-    protected function _construct() {
-        parent::_construct();
-    }
+    private $_block = 'fianet/adminhtml_tree_abstract';
 
     protected function _initCategory($getRootInstead = false) {
-        //Zend_Debug::dump('Fianet_Core_Controller_Tree_Abstract::_initCategory()');
         $categoryId = (int) $this->getRequest()->getParam('id', false);
         $storeId = (int) $this->getRequest()->getParam('store', 0);
         $category = Mage::getModel('catalog/category');
@@ -55,7 +50,6 @@ abstract class Fianet_Core_Controller_Tree_Abstract extends Mage_Adminhtml_Contr
 
         Mage::register('category', $category);
         Mage::register('current_category', $category);
-        //Zend_Debug::dump("Mage::register('current_category', ".$category->getId().")");
         return $category;
     }
 

@@ -10,9 +10,9 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 ?>
@@ -28,15 +28,11 @@ $config = array(
 );
 Fianet_Core_Model_Configuration::SetDefaultConfig($config);
 */
-$shipping_list = Mage::getModel('fianet/MageConfiguration')
-        ->getShippingMethods();
-foreach ($shipping_list as $Code => $label) {
-    Mage::getModel('fianet/shipping_association')
-            ->load($Code)
-            ->setShipping_code($Code)
-            ->setFianet_shipping_type('4')
-            ->setDelivery_times('2')
-            ->setConveyor_name('A definir')
-            ->save();
+$shippingList = Mage::getModel('fianet/mageConfiguration')->getShippingMethods();
+foreach (array_keys($shippingList) as $code) {
+    $installer->run("
+        INSERT IGNORE INTO `{$this->getTable('fianet_shipping_association')}` (`shipping_code`, `fianet_shipping_type`, `delivery_times`, `conveyor_name`) VALUES
+        ('{$code}', '4', '2', 'A definir');
+    ");
 }
 $installer->endSetup();

@@ -10,50 +10,46 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 class Fianet_Core_Model_Fianet_Parser {
 
-    public function process_result($xml_array) {
+    public function processResult($xmlArray) {
         $evaluations = array();
-        //Zend_Debug::dump($xml_array, 'xml_array');
-        if (isset($xml_array['stack']['result'][0])) {
-            foreach ($xml_array['stack']['result'] as $result) {
+        if (isset($xmlArray['stack']['result'][0])) {
+            foreach ($xmlArray['stack']['result'] as $result) {
                 if (preg_match("#error#", $result['attr']['retour'])) {
-                    Mage::getModel('fianet/log')->Log("Parser.php - process_result() - Erreur : " . $result['attr']['message']);
+                    Mage::getModel('fianet/log')->log("Parser.php - processResult() - Erreur : " . $result['attr']['message']);
                 } else {
                     $index = count($evaluations);
-                    $evaluations[$index] = $this->process_result_array($result);
+                    $evaluations[$index] = $this->_processResultArray($result);
                 }
             }
         } else {
-            $res = $xml_array['stack']['result'];
+            $res = $xmlArray['stack']['result'];
             if (preg_match("#error#", $res['attr']['retour'])) {
-                Mage::getModel('fianet/log')->Log("Parser.php - process_result() - Erreur : " . $res['attr']['message']);
+                Mage::getModel('fianet/log')->log("Parser.php - processResult() - Erreur : " . $res['attr']['message']);
             } else {
                 $index = count($evaluations);
-                $evaluations[$index] = $this->process_result_array($res);
+                $evaluations[$index] = $this->_processResultArray($res);
             }
         }
-        //Zend_Debug::dump($evaluations);
         return ($evaluations);
     }
 
-    public function process_result_stacking($xml_data) {
+    public function processResultStacking($xml_data) {
         $result = array();
-        $xml_array = Fianet_Core_Model_Functions::xml2array($xml_data);
-        //debug($xml_array);
-        if (isset($xml_array['validstack']['unluck'])) {
-            Mage::getModel('fianet/log')->Log("Parser - process_result_stacking() - Error : " . $xml_array['validstack']['unluck']['value']);
+        $xmlArray = Fianet_Core_Model_Functions::xml2array($xml_data);
+        if (isset($xmlArray['validstack']['unluck'])) {
+            Mage::getModel('fianet/log')->log("Parser - processResultStacking() - Error : " . $xmlArray['validstack']['unluck']['value']);
             return ($result);
-        } elseif (isset($xml_array['validstack']['result'])) {
-            $xml_array = $xml_array['validstack']['result'];
-            //debug($xml_array);
-            if (isset($xml_array[0])) {
-                foreach ($xml_array as $transaction_result) {
+        } elseif (isset($xmlArray['validstack']['result'])) {
+            $xmlArray = $xmlArray['validstack']['result'];
+            if (isset($xmlArray[0])) {
+                foreach ($xmlArray as $transaction_result) {
                     $index = count($result);
                     $result[$index]['refid'] = $transaction_result['attr']['refid'];
                     $result[$index]['etat'] = $transaction_result['attr']['avancement'];
@@ -61,35 +57,34 @@ class Fianet_Core_Model_Fianet_Parser {
                 }
             } else {
                 $index = count($result);
-                $result[$index]['refid'] = $xml_array['attr']['refid'];
-                $result[$index]['etat'] = $xml_array['attr']['avancement'];
-                $result[$index]['details'] = $xml_array['detail']['value'];
+                $result[$index]['refid'] = $xmlArray['attr']['refid'];
+                $result[$index]['etat'] = $xmlArray['attr']['avancement'];
+                $result[$index]['details'] = $xmlArray['detail']['value'];
             }
         }
         return ($result);
     }
 
-    public function process_result_nostack($xml_array) {
+    public function processResultNostack($xmlArray) {
         $evaluations = array();
-        //Zend_Debug::dump($xml_array, 'xml_array');
-        Mage::getModel('fianet/log')->log('Parser->process_result_nostack(), return value : ' . $xml_array['result']['attr']['retour']);
-        if ($xml_array['result']['attr']['retour'] == 'absente') {
+        Mage::getModel('fianet/log')->log('Parser->processResultNostack(), return value : ' . $xmlArray['result']['attr']['retour']);
+        if ($xmlArray['result']['attr']['retour'] == 'absente') {
             return ($evaluations);
         }
-        if ($xml_array['result']['attr']['retour'] == 'param_error') {
-            Mage::getModel('fianet/log')->log('Parser->process_result_nostack(), param error : ' . $xml_array['result']['attr']['message']);
+        if ($xmlArray['result']['attr']['retour'] == 'param_error') {
+            Mage::getModel('fianet/log')->log('Parser->processResultNostack(), param error : ' . $xmlArray['result']['attr']['message']);
             return ($evaluations);
         }
-        if (isset($xml_array['result']['transaction'][0])) {
-            foreach ($xml_array['result']['transaction'] as $res) {
-                $eval = $this->process_transaction_array($res);
+        if (isset($xmlArray['result']['transaction'][0])) {
+            foreach ($xmlArray['result']['transaction'] as $res) {
+                $eval = $this->_processTransactionArray($res);
                 if ($eval['refid'] != null) {
                     $evaluations[$eval['refid']] = $eval;
                 }
             }
-        } elseif (isset($xml_array['result']['transaction'])) {
-            $res = $xml_array['result']['transaction'];
-            $eval = $this->process_transaction_array($res);
+        } elseif (isset($xmlArray['result']['transaction'])) {
+            $res = $xmlArray['result']['transaction'];
+            $eval = $this->_processTransactionArray($res);
             if ($eval['refid'] != null) {
                 $evaluations[$eval['refid']] = $eval;
             }
@@ -98,28 +93,27 @@ class Fianet_Core_Model_Fianet_Parser {
         return ($evaluations);
     }
 
-    private function process_result_array($res) {
-        //Zend_Debug::dump($res, 'Result');
-        $eval['refid'] = $res['attr']['refid'];
+    private function _processResultArray($res) {		
+        $eval = array('refid' => $res['attr']['refid']);
         if ($res['attr']['retour'] == 'absente') {
             $eval['info'] = 'absente';
         } else {
             if (isset($res['transaction'][0])) {
-                $index = $this->search_last_valid_transaction($res['transaction']);
+                $index = $this->_searchLastValidTransaction($res['transaction']);
                 $transaction = $index >= 0 ? $res['transaction'][$index] : end($res['transaction']);
             } else {
                 $transaction = $res['transaction'];
             }
-            $etat = $this->process_transaction_array($transaction);
+            $etat = $this->_processTransactionArray($transaction);
             $eval['eval'] = $etat['eval'];
             $eval['info'] = $etat['info'];
             $eval['cid'] = $etat['cid'];
+			$eval['classementid'] = $etat['classementid'];
         }
-        //Zend_Debug::dump($eval);
         return ($eval);
     }
 
-    private function search_last_valid_transaction($transactions) {
+    private function _searchLastValidTransaction($transactions) {
         $index = -1;
         foreach ($transactions as $i => $transaction) {
             if ($transaction['attr']['avancement'] == 'traitee') {
@@ -129,26 +123,28 @@ class Fianet_Core_Model_Fianet_Parser {
         return ($index);
     }
 
-    private function process_transaction_array($transaction) {
-        $eval = array();
-        //Zend_Debug::dump($transaction);
+    private function _processTransactionArray($transaction) {
+
+		$eval = array();
 
         if ($transaction['attr']['avancement'] == 'error') {
             $eval['refid'] = isset($transaction['attr']['refid']) == true ? $transaction['attr']['refid'] : null;
             $eval['eval'] = 'error';
             $eval['info'] = $transaction['detail']['value'];
             $eval['cid'] = $transaction['attr']['cid'];
-        }
-        if ($transaction['attr']['avancement'] == 'encours') {
+			$eval['classementid'] = '';
+        }else if ($transaction['attr']['avancement'] == 'encours') {
             $eval['refid'] = isset($transaction['attr']['refid']) == true ? $transaction['attr']['refid'] : null;
             $eval['eval'] = 'encours';
             $eval['info'] = $transaction['detail']['value'];
             $eval['cid'] = '';
+			$eval['classementid'] = '';
         } elseif ($transaction['attr']['avancement'] == 'traitee') {
             $eval['refid'] = isset($transaction['attr']['refid']) == true ? $transaction['attr']['refid'] : null;
             $eval['eval'] = $transaction['analyse']['eval']['value'];
             $eval['info'] = $transaction['analyse']['eval']['attr']['info'];
             $eval['cid'] = $transaction['attr']['cid'];
+			$eval['classementid'] = $transaction['analyse']['classement']['attr']['id'];
         }
 
         return ($eval);

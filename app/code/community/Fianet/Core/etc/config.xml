@@ -10,16 +10,16 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 -->
 <config>
     <modules>
         <Fianet_Core>
-            <version>0.9.0</version>
+            <version>1.0.1</version>
         </Fianet_Core>
     </modules>
     <admin>
@@ -47,55 +47,6 @@
                 </Fianet_Core>
             </modules>
         </translate>
-        <menu>
-            <fianet module="fianet">
-                <title>RNP - Kwixo</title>
-                <sort_order>420</sort_order>
-                <children>
-                    <config module="fianet" translate="title">
-                        <title>Common settings</title>
-                        <sort_order>0</sort_order>
-                        <children>
-                            <configuration translate="title" module="fianet">
-                                <title>Configuration</title>
-                                <sort_order>0</sort_order>
-                                <action>fianet/configuration</action>
-                            </configuration>
-                            <catproduct translate="title" module="fianet">
-                                <title>Products type</title>
-                                <sort_order>1</sort_order>
-                                <action>fianet/category_typeproduct</action>
-                            </catproduct>
-                            <shipping translate="title" module="fianet">
-                                <title>Shipping type</title>
-                                <sort_order>2</sort_order>
-                                <action>fianet/shipping</action>
-                            </shipping>
-                        </children>
-                    </config>
-                    <log module="fianet" translate="title">
-                        <title>Log</title>
-                        <sort_order>10</sort_order>
-                        <action>fianet/log</action>
-                    </log>
-                </children>
-            </fianet>
-        </menu>
-        <acl>
-            <resources>
-                <all>
-                    <title>Allow Everything</title>
-                </all>
-                <admin>
-                    <children>
-                        <fianet>
-                            <title>FIA-NET</title>
-                            <sort_order>200</sort_order>
-                        </fianet>
-                    </children>
-                </admin>
-            </resources>
-        </acl>
         <layout>
             <updates>
                 <fianet>
@@ -114,25 +65,23 @@
                 <class>Fianet_Core_Model_Mysql4</class>
                 <entities>
                     <shipping_association>
-                        <table>fianet_shipping_association</table>
+                        <table>fianet_core_shipping_association</table>
                     </shipping_association>
                     <catproduct_association>
-                        <table>fianet_catproduct_association</table>
+                        <table>fianet_core_catproduct_association</table>
                     </catproduct_association>
                     <configuration>
-                        <table>fianet_configuration</table>
+                        <table>fianet_core_configuration</table>
                     </configuration>
                     <configuration_value>
-                        <table>fianet_configuration_values</table>
+                        <table>fianet_core_configuration_values</table>
                     </configuration_value>
                     <log>
-                        <table>fianet_log</table>
+                        <table>fianet_core_log</table>
                     </log>
                 </entities>
             </fianet_mysql4>
-
         </models>
-
         <resources>
             <fianet_setup>
                 <setup>
@@ -156,7 +105,7 @@
         <blocks>
             <adminhtml>
                 <rewrite>
-                    <sales_order_grid>Fianet_Core_Block_Sales_Order_Grid</sales_order_grid>
+                    <sales_order_grid>Fianet_Core_Block_Adminhtml_Sales_Order_Grid</sales_order_grid>
                 </rewrite>
             </adminhtml>
             <fianet>

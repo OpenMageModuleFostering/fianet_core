@@ -10,9 +10,9 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 class Fianet_Core_Model_Fianet_Order_Payment {
@@ -41,32 +41,32 @@ class Fianet_Core_Model_Fianet_Order_Payment {
         }
     }
 
-    public function get_xml() {
+    public function getXml() {
         $xml = '';
         if ($this->type != null) {
             $xml .= "\t" . '<paiement>' . "\n";
 
-            $xml .= "\t\t" . '<type>' . $this->type . '</type>' . "\n";
+            $xml .= "\t\t" . '<type><![CDATA[' . $this->type . ']]></type>' . "\n";
             if ($this->type == 'carte' || $this->type == 'paypal') {
                 if ($this->numcb != null) {
-                    $xml .= "\t\t" . '<numcb>' . $this->numcb . '</numcb>' . "\n";
+                    $xml .= "\t\t" . '<numcb><![CDATA[' . $this->numcb . ']]></numcb>' . "\n";
                 }
                 if ($this->dateval != null) {
-                    $xml .= "\t\t" . '<dateval>' . $this->dateval . '</dateval>' . "\n";
+                    $xml .= "\t\t" . '<dateval><![CDATA[' . $this->dateval . ']]></dateval>' . "\n";
                 }
                 if ($this->bin != null) {
-                    $xml .= "\t\t" . '<bin>' . $this->bin . '</bin>' . "\n";
+                    $xml .= "\t\t" . '<bin><![CDATA[' . $this->bin . ']]></bin>' . "\n";
                 }
                 if ($this->bin4 != null) {
-                    $xml .= "\t\t" . '<bin4>' . $this->bin4 . '</bin4>' . "\n";
+                    $xml .= "\t\t" . '<bin4><![CDATA[' . $this->bin4 . ']]></bin4>' . "\n";
                 }
                 if ($this->bin42 != null) {
-                    $xml .= "\t\t" . '<bin42>' . $this->bin42 . '</bin42>' . "\n";
+                    $xml .= "\t\t" . '<bin42><![CDATA[' . $this->bin42 . ']]></bin42>' . "\n";
                 }
             }
             $xml .= "\t" . '</paiement>' . "\n";
         } else {
-            Mage::throwException("Mage_Fianet_Model_Fianet_Order_Payment::get_xml() - Type is undefined");
+            Mage::throwException("Mage_Fianet_Model_Fianet_Order_Payment::getXml() - Type is undefined");
         }
         return ($xml);
     }

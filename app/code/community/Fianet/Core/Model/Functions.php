@@ -10,14 +10,14 @@
  * If you are unable to obtain it through the world-wide-web, please contact us
  * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
  *
- *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @author FIA-NET <support-boutique@fia-net.com>
  *  @copyright 2000-2012 FIA-NET
- *  @version Release: $Revision: 0.9.0 $
+ *  @version Release: $Revision: 1.0.1 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 class Fianet_Core_Model_Functions {
 
-    public function clean_xml($xml) {
+    public function cleanXml($xml) {
         $xml = str_replace("\\'", "'", $xml);
         $xml = str_replace("\\\"", "\"", $xml);
         $xml = str_replace("\\\\", "\\", $xml);
@@ -28,8 +28,8 @@ class Fianet_Core_Model_Functions {
         return ($xml);
     }
 
-    public function clean_invalid_char($var) {
-        //supprimes les balises html
+    public function cleanInvalidChar($var) {
+        //supprime les balises html
         $var = strip_tags($var);
         //$var = str_replace("&", "&&amp;", $var);
         $var = str_replace('&', '', $var);
@@ -39,19 +39,8 @@ class Fianet_Core_Model_Functions {
         return ($var);
     }
 
-    public function var_is_object_of_class($var, $class_name) {
-        $res = false;
-        if (is_object($var)) {
-            $name = get_class($var);
-            if ($name == $class_name) {
-                $res = true;
-            }
-        }
-        return ($res);
-    }
-
     //Calcule la date de livraison en jour ouvré à partir de la date courante
-    public function get_delivery_date($delivery_times, Fianet_Core_Model_Configuration_Value $configurationData, $orderIncrementId) {
+    public function getDeliveryDate($deliveryTimes, $id, $orderIncrementId) {
         define('H', date("H"));
         define('i', date("i"));
         define('s', date("s"));
@@ -63,8 +52,9 @@ class Fianet_Core_Model_Functions {
 
         $nb_days = 0;
         $j = 0;
-        $log = "Délais de livraison le plus long : {$delivery_times} commande #{$orderIncrementId} \r\n";
-        while ($nb_days < $delivery_times) {
+        $log = 'Delais de livraison le plus long : ' . $deliveryTimes . " commande #" . $orderIncrementId . " \r\n";
+
+        while ($nb_days < $deliveryTimes) {
             $j++;
             $date = mktime(H, i, s, m, d + $j, Y);
             $day = date("N", $date);
@@ -75,46 +65,41 @@ class Fianet_Core_Model_Functions {
                 $log .= 'J' . $j . '(' . date('Y-m-d', $date) . ') est un week-end(' . date('l', $date) . ').' . "\r\n";
             }
         }
-        $max = $configurationData->load('RNP_MERCHANT_MAX_DELIVERY_TIMES')->Value;
+
+        $max = Mage::getStoreConfig('kwixo/kwixoconfg/maxdeliverytimes', $id);
         if ($max == null) {
-            $configurationData->setScope(0);
-            $max = $configurationData->load('RNP_MERCHANT_MAX_DELIVERY_TIMES')->Value;
+            $max = Mage::getStoreConfig('kwixo/kwixoconfg/maxdeliverytimes', '0');
         }
-        $max = (int) $max;
+        $max = intval($max);
         if ($j > $max) {//si on dépasse le délais de livraison max à causes des samedi et dimanche on remet le délais de livraison à son maximum
             $j = $max;
-            $log .= "{$max} jours dépassés. Date de livraison ramenée à {$max} jours";
+            $log .= $max . ' jours depasses. Date de livraison ramenee a ' . $max . ' jours';
         }
-        //$j = 200;
 
-        Mage::getModel('fianet/log')->Log($log);
+        Mage::getModel('fianet/log')->log($log);
         $date = mktime(H, i, s, m, d + $j, Y);
         return (date("Y-m-d", $date));
     }
 
     public function getStore() {
-        $scope = Mage::getModel('fianet/configuration_global')
-                        ->load('CONFIGURATION_SCOPE')
-                ->Value;
-        $store = 0;
+        $scope = 'store_id';
         switch ($scope) {
             case('website_id'):
-                $store = (integer) Mage::app()->getStore(true)->getWebsiteId();
+                $store = (int) Mage::app()->getStore(true)->getWebsiteId();
                 break;
             case ('group_id'):
-                $store = (integer) Mage::app()->getStore(true)->getGroupId();
+                $store = (int) Mage::app()->getStore(true)->getGroupId();
                 break;
             case('store_id'):
-                $store = (integer) Mage::app()->getStore(true)->getStoreId();
+                $store = (int) Mage::app()->getStore(true)->getStoreId();
                 break;
-        }
-        if ($store == 0) {
-            Mage::getModel('fianet/log')->log('Unable to retrieve ' . $scope);
+            default :
+                $store = 0;
         }
         return ($store);
     }
 
-    public static function xml2array($contents, $get_attributes = 1) {
+    public static function xml2array($contents, $getAttributes = 1) {
         if (!$contents)
             return array();
 
@@ -123,46 +108,41 @@ class Fianet_Core_Model_Functions {
             return array();
         }
         //Get the XML parser of PHP - PHP must have this module for the parser to work
+        $xmlValues = null;
         $parser = xml_parser_create();
         xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
         xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-        xml_parse_into_struct($parser, $contents, $xml_values);
+        xml_parse_into_struct($parser, $contents, $xmlValues);
         xml_parser_free($parser);
 
-        if (!$xml_values)
+        if (!$xmlValues)
             return; //Hmm...
 
-
         //Initializations
-        $xml_array = array();
-        //$parents = array();
-        //$opened_tags = array();
-        //$arr = array();
-
-        $current = &$xml_array;
+        $xmlArray = array();
+        $current = &$xmlArray;
 
         //Go through the tags.
-        foreach ($xml_values as $data) {
+        foreach ($xmlValues as $data) {
             unset($attributes, $value); //Remove existing values, or there will be trouble
             //This command will extract these variables into the foreach scope
             // tag(string), type(string), level(int), attributes(array).
             extract($data); //We could use the array by itself, but this cooler.
 
             $result = '';
-            if ($get_attributes) {//The second argument of the function decides this.
+            if ($getAttributes) {//The second argument of the function decides this.
                 $result = array();
                 if (isset($value))
                     $result['value'] = $value;
                 //Set the attributes too.
                 if (isset($attributes)) {
                     foreach ($attributes as $attr => $val) {
-                        if ($get_attributes == 1)
+                        if ($getAttributes == 1)
                             $result['attr'][$attr] = $val; //Set all the attributes in a array called 'attr'
                         /**  :TODO: should we change the key name to '_attr'? Someone may use the tagname 'attr'. Same goes for 'value' too */
                     }
                 }
-            }
-            elseif (isset($value)) {
+            } elseif (isset($value)) {
                 $result = $value;
             }
 
@@ -187,8 +167,8 @@ class Fianet_Core_Model_Functions {
                     $current[$tag] = $result;
                     //array_push($current[$tag],$result);
                 } else { //If taken, put all things inside a list(array)
-                    if ((is_array($current[$tag]) and $get_attributes == 0)//If it is already an array...
-                            or (isset($current[$tag][0]) and is_array($current[$tag][0]) and $get_attributes == 1)) {
+                    if ((is_array($current[$tag]) and $getAttributes == 0)//If it is already an array...
+                            or (isset($current[$tag][0]) and is_array($current[$tag][0]) and $getAttributes == 1)) {
                         array_push($current[$tag], $result); // ...push the new element into that array.
                     } else { //If it is not an array...
                         $current[$tag] = array($current[$tag], $result); //...Make it an array using using the existing value and the new value
@@ -198,10 +178,10 @@ class Fianet_Core_Model_Functions {
                 $current = &$parent[$level - 1];
             }
         }
-        return($xml_array);
+        return($xmlArray);
     }
 
-    public static function compare_billing_and_shipping(Mage_Sales_Model_Order_Address $billing, Mage_Sales_Model_Order_Address $shipping) {
+    public static function compareBillingAndShipping(Mage_Sales_Model_Order_Address $billing, Mage_Sales_Model_Order_Address $shipping) {
         $identical = true;
         if ($billing->getLastname() != $shipping->getLastname()) {
             $identical = false;
