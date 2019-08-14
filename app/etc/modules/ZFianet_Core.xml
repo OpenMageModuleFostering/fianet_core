@@ -11,7 +11,7 @@
             <depends>
             </depends>
             <!-- declare module's version information for database updates -->
-            <version>0.7.4</version>
+            <version>0.7.5</version>
         </Fianet_Core>
     </modules>
 </config>
