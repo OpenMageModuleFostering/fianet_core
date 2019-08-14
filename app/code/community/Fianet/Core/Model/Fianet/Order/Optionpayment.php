@@ -15,26 +15,22 @@
  *  @version Release: $Revision: 0.9.0 $
  *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
-class Fianet_Core_Model_Fianet_Order_User_Siteconso {
+class Fianet_Core_Model_Fianet_Order_Optionpayment {
 
-    public $nb = 0;
-    public $ca = 0;
-    public $datepremcmd = null;
-    public $datederncmd = null;
-
-    public function __construct() {
-
-    }
+    public $typpayment = null;
+    public $comptantrnp = null;
+    public $comptantrnpoffert = null;
 
     public function get_xml() {
-        $xml = '';
-        if ($this->nb > 0) {
-            $xml .= "\t\t" . '<siteconso>' . "\n";
-            $xml .= "\t\t\t" . '<nb>' . $this->nb . '</nb>' . "\n";
-            $xml .= "\t\t\t" . '<ca>' . number_format($this->ca, 2, '.', '') . '</ca>' . "\n";
-            $xml .= "\t\t\t" . '<datepremcmd>' . $this->datepremcmd . '</datepremcmd>' . "\n";
-            $xml .= "\t\t\t" . '<datederncmd>' . $this->datederncmd . '</datederncmd>' . "\n";
-            $xml .= "\t\t" . '</siteconso>' . "\n";
+        $xml = "";
+        if ($this->typpayment == "comptant" && ($this->comptantrnp == '1' || $this->comptantrnp == '0')) {
+            //comptant
+            $xml .= "\t" . '<options-paiement type="' . $this->typpayment . '" comptant-rnp="' . $this->comptantrnp . '">' . "\n";
+            $xml .= "\t" . '</options-paiement>' . "\n";
+        } elseif($this->typpayment == "credit") {
+            //credit
+            $xml .= "\t" . '<options-paiement type="credit">' . "\n";
+            $xml .= "\t" . '</options-paiement>' . "\n";
         }
         return ($xml);
     }

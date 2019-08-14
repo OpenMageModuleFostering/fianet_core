@@ -1,11 +1,26 @@
 <?php
-	try
-	{
-		$form_key = Mage::getSingleton('core/session')->getFormKey();
-	}
-	catch(Exception $e)
-	{
-	}
+/**
+ * 2000-2012 FIA-NET
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0) that is available
+ * through the world-wide-web at this URL: http://www.opensource.org/licenses/OSL-3.0
+ * If you are unable to obtain it through the world-wide-web, please contact us
+ * via http://www.fia-net-group.com/formulaire.php so we can send you a copy immediately.
+ *
+ *  @author Quadra Informatique <ecommerce@quadra-informatique.fr>
+ *  @copyright 2000-2012 FIA-NET
+ *  @version Release: $Revision: 0.9.0 $
+ *  @license http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
+ */
+?>
+<?php
+try {
+    $form_key = Mage::getSingleton('core/session')->getFormKey();
+} catch (Exception $e) {
+
+}
 ?>
 <div class="content-header">
     <table cellspacing="0" class="grid-header">
@@ -21,66 +36,56 @@
 <div class="entry-edit">
     <form id="edit_form" name="edit_form" method="post" action="<?php echo $this->getUrl('*/*/post'); ?>">
         <?php
-		if (isset($form_key))
-        {
-			echo '<input type="hidden" name="form_key" value="'.$form_key.'" />';
+        if (isset($form_key)) {
+            echo '<input type="hidden" name="form_key" value="' . $form_key . '" />';
         }
         ?>
         <fieldset id="my-fieldset">
             <table cellspacing="0" class="form-list">
-				<tr>
-					<th><?php echo $this->__('Shipping method'); ?></th>
-					<th><?php echo $this->__('FIA-NET Shipping type'); ?></th>
-					<th><?php echo $this->__('Shipping speed'); ?></th>
-					<th><?php echo $this->__('Conveyor'); ?></th>
-				</tr>
-<?php
-$shipping_list = $this->shipping;
-$shipping_association = Mage::getModel("fianet/Shipping_Association");
-$ShippingType = Mage::getModel("fianet/source_ShippingType")->toOptionArray();
-$DeliveryTimes = Mage::getModel("fianet/source_DeliveryTimes")->toOptionArray();
-//Zend_Debug::dump($ShippingType);
-foreach ($shipping_list as $Code => $label)
-{
-	$current_shipping = Mage::getModel('fianet/shipping_association')->load($Code);
-	echo '<tr>';
-	echo '<td class="label">'.$label.'</td>';
-	echo '<td class="input-ele"><select name="'.$Code.'[shippingType]">';
-	foreach ($ShippingType as $data)
-	{
-		$sel = '';
-		if ($current_shipping->shipping_code == null && $data['value'] == '4')
-		{
-			$sel = ' selected';
-		}
-		elseif ($current_shipping->shipping_code != null)
-		{
-			$sel = $current_shipping->fianet_shipping_type == $data['value'] ? ' selected' : '';
-		}
-		echo '<option value="'.$data['value'].'"'.$sel.'>'.$data['label'].'</option>';
-	}
-	echo '</select></td>';
-	echo '<td class="input-ele"><select name="'.$Code.'[deliveryTimes]">';
-	foreach ($DeliveryTimes as $data)
-	{
-		$sel = '';
-		if ($current_shipping->shipping_code == null && $data['value'] == '2')
-		{
-			$sel = ' selected';
-		}
-		elseif ($current_shipping->shipping_code != null)
-		{
-			$sel = $current_shipping->delivery_times == $data['value'] ? ' selected' : '';
-		}
-		echo '<option value="'.$data['value'].'"'.$sel.'>'.$data['label'].'</option>';
-	}
-	echo '</select></td>';
-	$val = $current_shipping->shipping_code == null ? $this->__('To define') : $current_shipping->conveyor_name;
-	echo '<td class="input-ele">
-			<input type="text" name="'.$Code.'[conveyorName]" value="'.$val.'"></td>';
-	echo '</tr>';
-}
-?>
+                <tr>
+                    <th><?php echo $this->__('Shipping method'); ?></th>
+                    <th><?php echo $this->__('FIA-NET Shipping type'); ?></th>
+                    <th><?php echo $this->__('Shipping speed'); ?></th>
+                    <th><?php echo $this->__('Conveyor'); ?></th>
+                </tr>
+                <?php
+                $shipping_list = $this->shipping;
+                $shipping_association = Mage::getModel("fianet/Shipping_Association");
+                $ShippingType = Mage::getModel("fianet/source_ShippingType")->toOptionArray();
+                $DeliveryTimes = Mage::getModel("fianet/source_DeliveryTimes")->toOptionArray();
+                //Zend_Debug::dump($ShippingType);
+                foreach ($shipping_list as $Code => $label) {
+                    $current_shipping = Mage::getModel('fianet/shipping_association')->load($Code);
+                    echo '<tr>';
+                    echo '<td class="label">' . $label . '</td>';
+                    echo '<td class="input-ele"><select name="' . $Code . '[shippingType]">';
+                    foreach ($ShippingType as $data) {
+                        $sel = '';
+                        if ($current_shipping->shipping_code == null && $data['value'] == '4') {
+                            $sel = ' selected';
+                        } elseif ($current_shipping->shipping_code != null) {
+                            $sel = $current_shipping->fianet_shipping_type == $data['value'] ? ' selected' : '';
+                        }
+                        echo '<option value="' . $data['value'] . '"' . $sel . '>' . $data['label'] . '</option>';
+                    }
+                    echo '</select></td>';
+                    echo '<td class="input-ele"><select name="' . $Code . '[deliveryTimes]">';
+                    foreach ($DeliveryTimes as $data) {
+                        $sel = '';
+                        if ($current_shipping->shipping_code == null && $data['value'] == '2') {
+                            $sel = ' selected';
+                        } elseif ($current_shipping->shipping_code != null) {
+                            $sel = $current_shipping->delivery_times == $data['value'] ? ' selected' : '';
+                        }
+                        echo '<option value="' . $data['value'] . '"' . $sel . '>' . $data['label'] . '</option>';
+                    }
+                    echo '</select></td>';
+                    $val = $current_shipping->shipping_code == null ? $this->__('To define') : $current_shipping->conveyor_name;
+                    echo '<td class="input-ele">
+                                        <input type="text" name="' . $Code . '[conveyorName]" value="' . $val . '"></td>';
+                    echo '</tr>';
+                }
+                ?>
             </table>
         </fieldset>
     </form>
