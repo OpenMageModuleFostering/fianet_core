@@ -222,7 +222,7 @@ class Fianet_Core_Model_Fianet_Order_Rnp
 		
 		$RnPOrder->info_commande->refid = $order->getRealOrderId();
 		$RnPOrder->info_commande->devise = $order->getBaseCurrencyCode();
-		$RnPOrder->info_commande->montant = $order->getBaseGrandTotal();
+		$RnPOrder->info_commande->montant = $order->getTotalDue();
 		$RnPOrder->info_commande->ip = $order->getRemoteIp();
 		$RnPOrder->info_commande->timestamp = $order->getCreatedAt();
 		
@@ -252,7 +252,7 @@ class Fianet_Core_Model_Fianet_Order_Rnp
 			$RnPOrder->info_commande->list->add_product($product);
 		}
 		
-		$RnPOrder->wallet->datelivr = Mage::getModel('fianet/functions')->get_delivery_date(self::getMaxShippingTimes($order), $configurationData, $order->getRealOrderId());
+		$RnPOrder->wallet->datelivr = Mage::getModel('fianet/functions')->get_delivery_date(self::getMaxShippingTimes($order));
 		return ($RnPOrder);
 	}
 	
