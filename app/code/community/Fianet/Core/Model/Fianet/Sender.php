@@ -45,23 +45,54 @@ class Fianet_Core_Model_Fianet_Sender
 	
 	public function get_reevaluation()
 	{
-		$reevaluations = array();
-		$Valuescollection = Mage::getModel('fianet/configuration_value')->getCollection();
+		$ConfigurationScope = Mage::getModel('fianet/configuration')->getGlobalValue('CONFIGURATION_SCOPE');
+		//Zend_Debug::dump($ConfigurationScope, 'ConfigurationScope');
 		$sites = array();
-		foreach ($Valuescollection as $Value)
+		$websiteCollection = Mage::getModel('core/website')->getResourceCollection();
+		foreach ($websiteCollection as $website)
 		{
-			if ($Value->code == 'SAC_SITEID')
+			$groupCollection = $website->getGroupCollection();
+			foreach ($groupCollection as $group)
 			{
-				$data['siteid'] = $Value->Value;
-				$data['website_id'] = $Value->Website_id;
-				$data['group_id'] = $Value->Group_id;
-				$data['store_id'] = $Value->Store_id;
-				
-				$infos = $this->get_siteid_infos($data);
-				$sites = array_merge($sites, $infos);
+				$viewCollection = $group->getStoreCollection();
+				foreach ($viewCollection as $storeView)
+				{
+					$storeView->getId();
+					$configurationData = Mage::getModel('fianet/configuration_value');
+					$configurationData->_scope_field = $ConfigurationScope;
+					switch ($ConfigurationScope)
+					{
+						case 'website_id':
+							$id = $website->getId();
+							break;
+						case 'group_id':
+							$id = $group->getId();
+							break;
+						case 'store_id':
+							$id = $storeView->getId();
+							break;
+					}
+					$configurationData->setScope($id);
+
+					$index = count($sites);
+					$sites[$index]['siteid'] = $configurationData->load('SAC_SITEID')->getValue();
+					$sites[$index]['password'] = $configurationData->load('SAC_PASSWORD')->getValue();
+					$sites[$index]['mode'] = $configurationData->load('SAC_STATUS')->getValue();
+					if ($sites[$index]['siteid'] === NULL)
+					{
+						$configurationData->setScope(0);
+						$sites[$index]['siteid'] = $configurationData->load('SAC_SITEID')->getValue();
+						$sites[$index]['password'] = $configurationData->load('SAC_PASSWORD')->getValue();
+						$sites[$index]['mode'] = $configurationData->load('SAC_STATUS')->getValue();
+						if ($sites[$index]['siteid'] === NULL || $sites[$index]['password'] === NULL)
+						{
+							unset($sites[$index]);
+						}
+					}
+				}
 			}
 		}
-		//
+		$reevaluations = array();
 		foreach ($sites as $infos)
 		{
 			$url = $this->build_url('SAC_URL_GETALERT', $infos['siteid'], $infos['mode']);
