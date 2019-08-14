@@ -1,0 +1,17 @@
+﻿<?xml version="1.0"?>
+<config>
+    <modules>
+        <!-- declare Mage_ReceiveAndPay module -->
+        <Fianet_Core>
+            <!-- this is an active module -->
+            <active>true</active>
+            <!-- this module will be located in app/code/community code pool -->
+            <codePool>community</codePool>
+            <!-- specify dependencies for correct module loading order -->
+            <depends>
+            </depends>
+            <!-- declare module's version information for database updates -->
+            <version>0.7.4</version>
+        </Fianet_Core>
+    </modules>
+</config>

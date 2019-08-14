@@ -1,0 +1,38 @@
+﻿<?xml version="1.0"?>
+<layout>
+    <fianet_category_typeproduct_index>
+		<reference name="left">
+			<!--block type="fianet/store_switcher" name="storeswitcher" /-->
+            <block type="fianet/tree_typeProduct" name="tree"></block>
+        </reference>
+		<reference name="content">
+            <block type="fianet/category_typeproduct_edit" name="catproduct" template="fianet/common/categorytreeformcontenair.phtml"/>
+        </reference>
+    </fianet_category_typeproduct_index>
+    <fianet_shipping_index>
+        <reference name="content">
+            <block type="fianet/fianetadmin" name="shipping" template="fianet/common/shipping.phtml"/>
+        </reference>
+    </fianet_shipping_index>
+    <fianet_log_index>
+        <reference name="content">
+            <block type="fianet/fianetadmingrid" name="log" />
+        </reference>
+    </fianet_log_index>
+    <fianet_configuration_index>
+        <reference name="left">
+            <block type="fianet/store_switcher" name="storeswitcher" />
+            <block type="fianet/configuration_tab" name="fianet_configuration_tabs">
+                <action method="addConfigurationTab">
+                    <name>CommonTab</name>
+                    <label>Common</label>
+                    <title>Common</title>
+                    <type>G</type>
+                </action>
+            </block>
+        </reference>
+        <reference name="content">
+            <block type="fianet/configuration" name="configuration_content" />
+        </reference>
+    </fianet_configuration_index>
+</layout>

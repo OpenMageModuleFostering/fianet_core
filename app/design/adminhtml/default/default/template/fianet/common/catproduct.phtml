@@ -1,0 +1,139 @@
+<div id="category-edit-container" class="category-content">
+<?php echo $this->getFormInitScripts() ?>
+<div class="content-header">
+    <?php echo $this->getHeaderHtml() ?>
+    <p class="content-buttons form-buttons"><?php echo $this->getButtonsHtml('header') ?></p>
+</div>
+<?php echo $this->getFormHtml() ?>
+</script>
+<?php if ($this->hasFooterButtons()): ?>
+    <div class="content-footer">
+        <p class="content-buttons form-buttons"><?php echo $this->getButtonsHtml('footer') ?></p>
+    </div>
+<?php endif; ?>
+<script type="text/javascript">
+    var editForm = new varienForm('edit_form', '<?php echo $this->getValidationUrl() ?>');
+</script>
+<?php echo $this->getFormScripts() ?>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+
+    function categoryReset(url,useAjax){
+        if(useAjax){
+            var params = {active_tab_id:false};
+            updateContent('<?php echo $this->getResetUrl() ?>', params);
+        }else{
+            location.href = '<?php echo $this->getResetUrl() ?>'
+        }
+    }
+    function categoryDelete(url, useAjax){
+        if(confirm('<?php echo Mage::helper('catalog')->__('Are you sure you want to delete this category?') ?>')){
+            if(useAjax){
+                tree.nodeForDelete = tree.currentNodeId;
+                updateContent(url, {}, true);
+            }else{
+                location.href = url;
+            }
+        }
+
+    }
+
+    /**
+     * Update category content area
+     */
+    function updateContent(url, params, refreshTree) {
+        if (!params) {
+            params = {};
+        }
+        if (!params.form_key) {
+            params.form_key = FORM_KEY;
+        }
+
+       /*if(params.node_name)
+       {
+           var currentNode = tree.getNodeById(tree.currentNodeId);
+           currentNode.setText(params.node_name);
+       }*/
+        var categoryContainer = $('category-edit-container');
+        new Ajax.Updater(
+            categoryContainer,
+            url + (url.match(new RegExp('\\?')) ? '&isAjax=true' : '?isAjax=true' ),
+            {
+                parameters:  params,
+                method:      'post',
+                loaderArea:  categoryContainer,
+                onSuccess: function(transport) {
+                    if (transport.responseText.isJSON()) {
+                       var response = transport.responseText.evalJSON();
+                       if (response.ajaxExpired && response.ajaxRedirect) {
+                           setLocation(response.ajaxRedirect);
+                           return false;
+                       }
+                    }
+                    // everything is ok
+                },
+                onComplete:  refreshTree ? refreshTreeArea.bind(this) : false,
+                evalScripts: true
+            }
+        );
+    }
+
+    /**
+     * Refresh tree nodes after saving or deleting a category
+     */
+    function refreshTreeArea(transport)
+    {
+        if (tree && editingCategoryBreadcrumbs) {
+            // category deleted - delete its node
+            if (tree.nodeForDelete) {
+                var parentNode = tree.getNodeById(tree.nodeForDelete).parentNode;
+                parentNode.removeChild(tree.getNodeById(tree.nodeForDelete));
+                tree.nodeForDelete = false;
+                tree.currentNodeId = false;
+            }
+            // category created - add its node
+            else if (tree.addNodeTo) {
+                var parent = tree.getNodeById(tree.currentNodeId);
+                var node = new Ext.tree.AsyncTreeNode(editingCategoryBreadcrumbs[editingCategoryBreadcrumbs.length - 1]);
+                node.loaded = true;
+                tree.addNodeTo = false;
+                tree.currentNodeId = node.id;
+                parent.appendChild(node);
+
+                if (parent.expanded) {
+                    tree.selectCurrentNode();
+                } else {
+                    var timer;
+                    parent.expand();
+                    var f = function(){
+                        if(parent.expanded){ // done expanding
+                            clearInterval(timer);
+                            tree.selectCurrentNode();
+                        }
+                    };
+                    timer = setInterval(f, 200);
+                }
+                // tree.selectCurrentNode();
+            }
+
+            // update all affected categories nodes names
+            for (var i = 0; i < editingCategoryBreadcrumbs.length; i++) {
+                var node = tree.getNodeById(editingCategoryBreadcrumbs[i].id);
+                if (node) {
+                    node.setText(editingCategoryBreadcrumbs[i].text);
+                }
+            }
+        }
+    }
+
+    function displayLoadingMask()
+    {
+       var loaderArea = $$('#html-body .wrapper')[0]; // Blocks all page
+        Position.clone($(loaderArea), $('loading-mask'), {offsetLeft:-2});
+        toggleSelectsUnderBlock($('loading-mask'), false);
+        Element.show('loading-mask');
+    }
+//]]>
+
+<?php echo $this->getChildHtml('googleoptimizer_js') ?>

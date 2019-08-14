@@ -1,0 +1,156 @@
+﻿<?xml version="1.0"?>
+<config>
+    <modules>
+        <Fianet_Core>
+            <version>0.7.4</version>
+        </Fianet_Core>
+    </modules>
+    <admin>
+        <routers>
+            <fianet>
+                <use>admin</use>
+                <args>
+                    <module>Fianet_Core</module>
+                    <frontName>fianet</frontName>
+                </args>
+            </fianet>
+        </routers>
+    </admin>
+
+    <adminhtml>
+        <helpers>
+            <data>Fianet_Core_Helper_Data</data>
+        </helpers>
+        <translate>
+            <modules>
+                <Fianet_Core>
+                    <files>
+                        <default>Fianet_Core.csv</default>
+                    </files>
+                </Fianet_Core>
+            </modules>
+        </translate>
+        <menu>
+            <fianet module="fianet">
+                <title>FIA-NET</title>
+                <sort_order>420</sort_order>
+                <children>
+                    <config module="fianet" translate="title">
+                        <title>Common settings</title>
+                        <sort_order>0</sort_order>
+                        <children>
+                            <configuration translate="title" module="fianet">
+                                <title>Configuration</title>
+                                <sort_order>0</sort_order>
+                                <action>fianet/configuration</action>
+                            </configuration>
+                            <catproduct translate="title" module="fianet">
+                                <title>Products type</title>
+                                <sort_order>1</sort_order>
+                                <action>fianet/category_typeproduct</action>
+                            </catproduct>
+                            <shipping translate="title" module="fianet">
+                                <title>Shipping type</title>
+                                <sort_order>2</sort_order>
+                                <action>fianet/shipping</action>
+                            </shipping>
+                        </children>
+                    </config>
+                    <log module="fianet" translate="title">
+                        <title>Log</title>
+                        <sort_order>10</sort_order>
+                        <action>fianet/log</action>
+                    </log>
+                </children>
+            </fianet>
+        </menu>
+        <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+                <admin>
+                    <children>
+                        <fianet>
+                            <title>FIA-NET</title>
+                            <sort_order>200</sort_order>
+                        </fianet>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+        <layout>
+            <updates>
+                <fianet>
+                    <file>fianet.xml</file>
+                </fianet>
+            </updates>
+        </layout>
+    </adminhtml>
+    <global>
+        <models>
+            <fianet>
+                <class>Fianet_Core_Model</class>
+                <resourceModel>fianet_mysql4</resourceModel>
+            </fianet>
+            <fianet_mysql4>
+                <class>Fianet_Core_Model_Mysql4</class>
+                <entities>
+                    <shipping_association>
+                        <table>fianet_shipping_association</table>
+                    </shipping_association>
+                    <catproduct_association>
+                        <table>fianet_catproduct_association</table>
+                    </catproduct_association>
+                    <configuration>
+                        <table>fianet_configuration</table>
+                    </configuration>
+                    <configuration_value>
+                        <table>fianet_configuration_values</table>
+                    </configuration_value>
+                    <log>
+                        <table>fianet_log</table>
+                    </log>
+                </entities>
+            </fianet_mysql4>
+			
+        </models>
+        
+        <resources>
+            <fianet_setup>
+                <setup>
+                    <module>Fianet_Core</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </fianet_setup>
+            <fianet_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </fianet_write>
+            <fianet_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </fianet_read>
+        </resources>
+        <blocks>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_grid>Fianet_Core_Block_Sales_Order_Grid</sales_order_grid>
+                </rewrite>
+            </adminhtml>
+            <fianet>
+                <class>Fianet_Core_Block</class>
+            </fianet>
+        
+    </blocks>
+        <helpers>
+            <fianet>
+                <class>Fianet_Core_Helper</class>
+            </fianet>
+        </helpers>
+    </global>
+</config>

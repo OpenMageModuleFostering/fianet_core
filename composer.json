@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Fianet_Core",
+    "type": "magento-module",
+    "license": "OSL-v3.0",
+    "homepage": "",
+    "description": "FIA-NET Core",
+    "authors": [
+    {
+        "name": "Fabrice Beck",
+        "email": "fabrice.beck@fia-net.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}
